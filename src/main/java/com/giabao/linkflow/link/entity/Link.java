@@ -1,7 +1,7 @@
 package com.giabao.linkflow.link.entity;
 
-import com.giabao.linkflow.common.BaseEntity;
-import com.giabao.linkflow.user.enity.User;
+import com.giabao.linkflow.common.entity.BaseEntity;
+import com.giabao.linkflow.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

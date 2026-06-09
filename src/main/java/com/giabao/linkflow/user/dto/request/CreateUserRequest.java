@@ -1,6 +1,6 @@
-package com.giabao.linkflow.user.dto.req;
+package com.giabao.linkflow.user.dto.request;
 
-import com.giabao.linkflow.user.enity.UserRole;
+import com.giabao.linkflow.user.entity.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

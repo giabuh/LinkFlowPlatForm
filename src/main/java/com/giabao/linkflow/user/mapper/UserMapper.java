@@ -1,9 +1,9 @@
 package com.giabao.linkflow.user.mapper;
 
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
-import com.giabao.linkflow.user.enity.User;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
+import com.giabao.linkflow.user.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

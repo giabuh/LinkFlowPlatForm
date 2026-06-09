@@ -1,13 +1,13 @@
-package com.giabao.linkflow.user.service.Impl;
+package com.giabao.linkflow.user.service.impl;
 
 import com.giabao.linkflow.common.dto.PageResponse;
 import com.giabao.linkflow.common.exception.AppException;
 import com.giabao.linkflow.common.response.ErrorCode;
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.req.UserFilterRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
-import com.giabao.linkflow.user.enity.User;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.request.UserFilterRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
+import com.giabao.linkflow.user.entity.User;
 import com.giabao.linkflow.user.mapper.UserMapper;
 import com.giabao.linkflow.user.repository.UserRepository;
 import com.giabao.linkflow.user.service.UserService;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class IUserService implements UserService {
+public class UserServiceImpl implements UserService {
     private static final String EMAIL_ALREADY_EXISTS_MESSAGE = "Email already exists";
     private static final String USER_PROFILE_NOT_FOUND_MESSAGE = "User profile not found";
 

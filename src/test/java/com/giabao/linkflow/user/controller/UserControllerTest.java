@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giabao.linkflow.common.dto.PageResponse;
 import com.giabao.linkflow.common.exception.AppException;
 import com.giabao.linkflow.common.response.ErrorCode;
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.req.UserFilterRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
-import com.giabao.linkflow.user.enity.UserRole;
+import com.giabao.linkflow.auth.service.TokenService;
+import com.giabao.linkflow.auth.service.RefreshSessionService;
+import com.giabao.linkflow.security.CustomUserDetailsService;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.request.UserFilterRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
+import com.giabao.linkflow.user.entity.UserRole;
 import com.giabao.linkflow.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,6 +51,15 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private TokenService tokenService;
+
+    @MockitoBean
+    private RefreshSessionService refreshSessionService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     void getAllUsersReturnsPagedUsersWithFilters() throws Exception {

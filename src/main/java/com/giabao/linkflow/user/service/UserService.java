@@ -1,10 +1,10 @@
 package com.giabao.linkflow.user.service;
 
 import com.giabao.linkflow.common.dto.PageResponse;
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.req.UserFilterRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.request.UserFilterRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
 
 import java.util.UUID;
 

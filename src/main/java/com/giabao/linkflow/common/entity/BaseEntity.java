@@ -1,4 +1,4 @@
-package com.giabao.linkflow.common;
+package com.giabao.linkflow.common.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

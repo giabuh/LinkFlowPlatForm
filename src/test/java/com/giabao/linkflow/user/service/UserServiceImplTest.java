@@ -3,15 +3,15 @@ package com.giabao.linkflow.user.service;
 import com.giabao.linkflow.common.dto.PageResponse;
 import com.giabao.linkflow.common.exception.AppException;
 import com.giabao.linkflow.common.response.ErrorCode;
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.req.UserFilterRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
-import com.giabao.linkflow.user.enity.User;
-import com.giabao.linkflow.user.enity.UserRole;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.request.UserFilterRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
+import com.giabao.linkflow.user.entity.User;
+import com.giabao.linkflow.user.entity.UserRole;
 import com.giabao.linkflow.user.mapper.UserMapper;
 import com.giabao.linkflow.user.repository.UserRepository;
-import com.giabao.linkflow.user.service.Impl.IUserService;
+import com.giabao.linkflow.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class IUserServiceTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -49,7 +49,7 @@ class IUserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private IUserService userService;
+    private UserServiceImpl userService;
 
     @Test
     void getAllUserUsesSpecificationAndPageable() {

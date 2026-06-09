@@ -1,4 +1,4 @@
-package com.giabao.linkflow.user.enity;
+package com.giabao.linkflow.user.entity;
 
 public enum UserRole {
     USER,

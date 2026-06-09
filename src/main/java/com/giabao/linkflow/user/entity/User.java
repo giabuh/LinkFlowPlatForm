@@ -1,6 +1,6 @@
-package com.giabao.linkflow.user.enity;
+package com.giabao.linkflow.user.entity;
 
-import com.giabao.linkflow.common.BaseEntity;
+import com.giabao.linkflow.common.entity.BaseEntity;
 import com.giabao.linkflow.link.entity.Link;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -2,10 +2,10 @@ package com.giabao.linkflow.user.controller;
 
 import com.giabao.linkflow.common.dto.PageResponse;
 import com.giabao.linkflow.common.annotation.ApiMessage;
-import com.giabao.linkflow.user.dto.req.CreateUserRequest;
-import com.giabao.linkflow.user.dto.req.UpdateUserRequest;
-import com.giabao.linkflow.user.dto.req.UserFilterRequest;
-import com.giabao.linkflow.user.dto.res.UserResponse;
+import com.giabao.linkflow.user.dto.request.CreateUserRequest;
+import com.giabao.linkflow.user.dto.request.UpdateUserRequest;
+import com.giabao.linkflow.user.dto.request.UserFilterRequest;
+import com.giabao.linkflow.user.dto.response.UserResponse;
 import com.giabao.linkflow.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
-package com.giabao.linkflow.user.dto.req;
+package com.giabao.linkflow.user.dto.request;
 
 import com.giabao.linkflow.common.dto.PageableRequest;
-import com.giabao.linkflow.user.enity.UserRole;
+import com.giabao.linkflow.user.entity.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,7 +1,7 @@
-package com.giabao.linkflow.user.dto.res;
+package com.giabao.linkflow.user.dto.response;
 
 
-import com.giabao.linkflow.user.enity.UserRole;
+import com.giabao.linkflow.user.entity.UserRole;
 
 import java.util.UUID;
 
