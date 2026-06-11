@@ -1,186 +1,149 @@
 # AGENTS.md
 
-## Project Name
-
-**LinkFlow Platform**
-
 ## Project Overview
 
-LinkFlow Platform is a production-style URL shortening and link analytics platform built with **Java 21**, **Spring Boot**, **PostgreSQL**, and **Flyway**.
+**LinkFlow Platform** is a backend-focused URL shortening and link analytics platform built with **Java 21, Spring Boot, PostgreSQL, Flyway, and JWT Security**.
 
-The system allows users to create short, clean, shareable links from long URLs. When someone visits a short link, the backend redirects the request to the original URL and records click analytics.
+The platform allows authenticated users to create short links from long URLs, manage their own links, redirect visitors to the original destination, and track basic click analytics.
 
-This project is not intended to be a basic CRUD application. It should be designed as a real backend portfolio project that demonstrates security, scalability, clean architecture, database design, caching readiness, and production-level API practices.
+This project must be developed as a production-style backend portfolio project, not as a simple CRUD demo.
 
 ---
 
-## Main Problem This Project Solves
+## Main Problem
 
-Long URLs are difficult to share, remember, track, and manage.
+Long URLs are difficult to share, remember, manage, and track.
 
 LinkFlow Platform solves this by providing:
 
 * Short and clean URLs
 * User-owned link management
 * Fast redirection
-* Click tracking
-* Link analytics
-* Link activation/deactivation
-* Expiration support
-* Security controls against abuse
-* A foundation for future scaling with Redis or async event processing
+* Link expiration
+* Active/inactive link control
+* Click counting
+* Basic click analytics
 
 Example:
 
 ```text
-Original URL:
-https://example.com/products/category/spring-boot-course?ref=facebook_campaign_2026
-
-Short URL:
-https://linkflow.io/aB92xK
+Original URL: https://example.com/products/spring-boot-course?ref=facebook
+Short URL:    https://linkflow.io/aB92xK
 ```
 
 ---
 
 ## Target Users
 
-The platform is designed for:
+The system is designed for:
 
-* Marketing teams tracking campaign performance
-* Social media managers sharing clean links
-* SaaS platforms needing trackable links
-* Businesses using branded links
-* Internal teams managing shared resources
-* Developers learning production-grade backend architecture
+* Marketing teams
+* Social media managers
+* SaaS platforms
+* Businesses
+* Internal company teams
+* Developers who need trackable links
 
 ---
 
 ## Core MVP Features
 
-The first version should focus on these features:
+Build the MVP first.
+
+Required features:
 
 1. User registration
-2. User login with JWT authentication
-3. Create short links
-4. Generate unique short codes
-5. Redirect short links to original URLs
-6. List the authenticated user's links
-7. Update link metadata, such as title or expiration date
-8. Activate or deactivate links
-9. Track total click count
-10. Store basic click events
-11. Provide basic analytics
-12. Support pagination, sorting, and filtering
-13. Use Flyway for database migration
-14. Use global exception handling
-15. Return consistent API responses
+2. User login with JWT
+3. Password hashing with BCrypt
+4. Create short links
+5. Generate unique short codes
+6. Redirect short links to original URLs
+7. List authenticated user's links
+8. Update link information
+9. Activate and deactivate links
+10. Delete links
+11. Track total click count
+12. Store basic click events
+13. View basic analytics for each link
+14. Pagination, sorting, and filtering
+15. Global exception handling
+16. Consistent API response format
 
 ---
 
-## Non-MVP Features for Future Versions
+## Future Features
 
-Do not implement these in the first version unless the MVP is already stable:
+Do not implement these before the MVP is stable:
 
-* Redis caching for high-speed redirects
-* Redis or Kafka-based async click tracking
+* Redis cache for fast redirects
+* Async click tracking with Redis Stream or Kafka
 * QR code generation
 * Custom aliases
 * Custom domains
-* Team or workspace support
-* Admin moderation panel
-* Suspicious URL detection
+* Admin moderation
 * Blocked domains
-* API keys for external integrations
-* Advanced analytics dashboard
-* Geolocation analytics
-* Browser/device analytics
-* CI/CD pipeline
-* Observability with logs, metrics, and tracing
+* Device, browser, and country analytics
+* API keys
+* CI/CD
+* Metrics and logging dashboard
 
 ---
 
-## Main Domain Concepts
+## Core Domain Models
 
 ### User
 
-A user owns links.
+A user owns many links.
 
-A user can:
+Required fields:
 
-* Register
-* Login
-* Create links
-* Manage their own links
-* View analytics for their own links
+* id
+* email
+* passwordHash
+* fullName
+* role
+* createdAt
+* updatedAt
 
 ### Link
 
-A link represents a shortened URL.
+A link belongs to one user.
 
-A link should contain:
+Required fields:
 
-* ID
-* Owner user ID
-* Original URL
-* Short code
-* Optional title
-* Click count
-* Active status
-* Optional expiration date
-* Created timestamp
-* Updated timestamp
+* id
+* userId
+* originalUrl
+* shortCode
+* title
+* clickCount
+* active
+* expiresAt
+* createdAt
+* updatedAt
 
-### Click Event
+### ClickEvent
 
-A click event represents one access to a short link.
+A click event belongs to one link.
 
-A click event may contain:
+Required fields:
 
-* ID
-* Link ID
-* Clicked timestamp
-* IP address
-* User agent
-* Referer
-* Browser
-* Device
-* Country
-
-For the MVP, it is acceptable to store only basic click event data.
+* id
+* linkId
+* clickedAt
+* ipAddress
+* userAgent
+* referer
 
 ---
 
-## Recommended Database Tables
-
-The initial database should contain:
-
-```text
-users
-links
-click_events
-```
-
-Relationship:
-
-```text
-users 1 ──── * links
-links 1 ──── * click_events
-```
-
-Meaning:
-
-* One user can create many links.
-* One link can have many click events.
-
----
-
-## Database Migration Rule
+## Database Direction
 
 Use **Flyway** as the source of truth for database schema.
 
-Do not rely on Hibernate auto-DDL to create or update production tables.
+Do not rely on Hibernate auto-DDL to create or update tables.
 
-Recommended configuration:
+Recommended setting:
 
 ```yaml
 spring:
@@ -189,417 +152,13 @@ spring:
       ddl-auto: validate
 ```
 
-Flyway migration files should be placed in:
+Recommended tables:
 
 ```text
-src/main/resources/db/migration
+users
+links
+click_events
 ```
-
-Example:
-
-```text
-V1__create_users_table.sql
-V2__create_links_table.sql
-V3__create_click_events_table.sql
-```
-
----
-
-## Recommended Backend Architecture
-
-Use package-by-feature architecture, not only package-by-layer.
-
-Recommended structure:
-
-```text
-com.giabao.linkflow
-├── auth
-├── user
-├── link
-├── redirect
-├── analytics
-├── admin
-├── common
-├── security
-└── config
-```
-
-Each feature package can contain its own:
-
-```text
-controller
-service
-repository
-dto
-mapper
-entity
-```
-
-Example:
-
-```text
-link
-├── LinkController.java
-├── LinkService.java
-├── LinkServiceImpl.java
-├── LinkRepository.java
-├── Link.java
-├── dto
-│   ├── CreateLinkRequest.java
-│   ├── UpdateLinkRequest.java
-│   └── LinkResponse.java
-└── mapper
-    └── LinkMapper.java
-```
-
----
-
-## Code Style Rules
-
-Follow clean code principles.
-
-The coding agent must follow these rules:
-
-1. Keep controllers thin.
-2. Put business logic inside services.
-3. Do not expose entities directly in API responses.
-4. Use DTOs for request and response models.
-5. Validate request DTOs with Jakarta Bean Validation.
-6. Use constructor injection.
-7. Avoid field injection.
-8. Avoid large service methods.
-9. Avoid duplicated logic.
-10. Keep method names clear and intention-revealing.
-11. Use transactions properly.
-12. Do not swallow exceptions silently.
-13. Use meaningful custom exceptions.
-14. Use pagination for list APIs.
-15. Avoid returning raw `Map<String, Object>` unless there is a strong reason.
-16. Avoid magic strings and magic numbers.
-17. Prefer enums for fixed business values.
-18. Keep security logic centralized.
-19. Keep API response format consistent.
-20. Write code that is easy to test.
-
----
-
-## Security Requirements
-
-Security is a core part of this project.
-
-The platform should support:
-
-* Password hashing with BCrypt
-* JWT-based authentication
-* Role-based authorization
-* User ownership validation
-* Protected APIs for authenticated users
-* Public redirect endpoint for short links
-* Validation against invalid URLs
-* Basic abuse prevention readiness
-
-Important rule:
-
-A user must never be able to access, update, delete, or view analytics for another user's links.
-
-Ownership checks are mandatory.
-
-Example:
-
-```text
-User A owns Link A.
-User B must not be able to update, delete, or view analytics for Link A.
-```
-
----
-
-## Authentication Direction
-
-Use JWT authentication.
-
-Recommended flow:
-
-```text
-User logs in
-        ↓
-Backend verifies email and password
-        ↓
-Backend generates JWT access token
-        ↓
-Client sends token in Authorization header
-        ↓
-Backend parses token
-        ↓
-Backend stores authenticated user in SecurityContextHolder
-        ↓
-Services use current user ID for ownership checks
-```
-
-The JWT subject should preferably contain the user ID.
-
-Example:
-
-```text
-sub = userId
-```
-
----
-
-## Redirect Flow
-
-The redirect endpoint should be public.
-
-Example:
-
-```http
-GET /{shortCode}
-```
-
-Flow:
-
-```text
-User opens short URL
-        ↓
-Backend receives shortCode
-        ↓
-Find link by shortCode
-        ↓
-Check if link exists
-        ↓
-Check if link is active
-        ↓
-Check if link is not expired
-        ↓
-Increase click count
-        ↓
-Record click event
-        ↓
-Redirect to original URL
-```
-
-For MVP, direct database access is acceptable.
-
-For future scaling, Redis cache can be added:
-
-```text
-shortCode -> originalUrl
-```
-
----
-
-## Analytics Direction
-
-MVP analytics can include:
-
-* Total clicks
-* Clicks by day
-* Latest click events
-* Click count per link
-
-Future analytics may include:
-
-* Browser statistics
-* Device statistics
-* Country statistics
-* Referrer statistics
-* Campaign performance
-
-Do not over-engineer analytics in the MVP.
-
----
-
-## Short Code Generation Requirements
-
-Short codes must be unique.
-
-A short code should be:
-
-* Short
-* URL-safe
-* Random or deterministic
-* Hard to guess
-* Collision-safe
-
-Recommended MVP approach:
-
-1. Generate a random Base62 code.
-2. Check uniqueness using the database unique constraint.
-3. Retry when a collision occurs.
-4. Keep a maximum retry limit.
-5. Throw a clear exception if generation fails.
-
-Example characters:
-
-```text
-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
-```
-
-Do not use confusing or unsafe characters in URLs.
-
----
-
-## API Response Format
-
-Use a consistent response format.
-
-Example success response:
-
-```json
-{
-  "timestamp": "2026-06-07T10:00:00Z",
-  "status": 200,
-  "message": "Success",
-  "data": {}
-}
-```
-
-Example error response:
-
-```json
-{
-  "timestamp": "2026-06-07T10:00:00Z",
-  "status": 400,
-  "error": "Bad Request",
-  "message": "Invalid original URL",
-  "path": "/api/v1/links"
-}
-```
-
-Do not return inconsistent response shapes across endpoints.
-
----
-
-## Suggested REST API Design
-
-### Auth APIs
-
-```http
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-```
-
-### Link APIs
-
-```http
-POST /api/v1/links
-GET /api/v1/links
-GET /api/v1/links/{id}
-PATCH /api/v1/links/{id}
-DELETE /api/v1/links/{id}
-PATCH /api/v1/links/{id}/activate
-PATCH /api/v1/links/{id}/deactivate
-```
-
-### Redirect API
-
-```http
-GET /{shortCode}
-```
-
-### Analytics APIs
-
-```http
-GET /api/v1/links/{id}/analytics
-GET /api/v1/links/{id}/click-events
-```
-
----
-
-## Validation Rules
-
-### User Registration
-
-Validate:
-
-* Email is required
-* Email format is valid
-* Password is required
-* Password has minimum length
-* Email must be unique
-
-### Link Creation
-
-Validate:
-
-* Original URL is required
-* Original URL must be valid
-* Title length must be limited
-* Expiration date must be in the future if provided
-
-### Short Code
-
-Validate:
-
-* Short code must be unique
-* Short code must contain only allowed characters
-* Short code length must be limited
-
----
-
-## Error Handling Rules
-
-Use global exception handling with `@RestControllerAdvice`.
-
-Common exceptions:
-
-* UserNotFoundException
-* EmailAlreadyExistsException
-* InvalidCredentialsException
-* LinkNotFoundException
-* LinkExpiredException
-* LinkInactiveException
-* AccessDeniedException
-* ShortCodeGenerationException
-* InvalidUrlException
-
-Do not expose stack traces to clients.
-
----
-
-## Transaction Rules
-
-Use `@Transactional` on service methods that modify data.
-
-Examples:
-
-```java
-@Transactional
-public LinkResponse createLink(CreateLinkRequest request) {
-    // business logic
-}
-```
-
-Use read-only transactions for query methods:
-
-```java
-@Transactional(readOnly = true)
-public Page<LinkResponse> getMyLinks(Pageable pageable) {
-    // query logic
-}
-```
-
----
-
-## Performance Rules
-
-The agent should design with performance in mind.
-
-Important points:
-
-* Add indexes for frequently queried columns.
-* Index `links.short_code`.
-* Index `links.user_id`.
-* Index `click_events.link_id`.
-* Avoid N+1 queries.
-* Use pagination for large lists.
-* Do not load unnecessary relationships eagerly.
-* Prefer lazy relationships by default.
-* Use fetch joins or EntityGraph only when needed.
-* Keep redirect flow fast.
-
----
-
-## Recommended PostgreSQL Indexes
 
 Recommended indexes:
 
@@ -612,218 +171,196 @@ CREATE INDEX idx_click_events_clicked_at ON click_events(clicked_at);
 
 ---
 
-## Entity Design Rules
+## Architecture Direction
 
-Use UUID as the primary key for main business tables.
+Use package-by-feature architecture.
 
-Recommended:
+Recommended structure:
 
-```java
-@Id
-@GeneratedValue
-private UUID id;
+```text
+com.giabao.linkflow
+├── auth
+├── user
+├── link
+├── redirect
+├── analytics
+├── common
+├── security
+└── config
 ```
 
-Use auditing fields:
+Each feature package may contain:
 
-```java
-createdAt
-updatedAt
+```text
+controller
+service
+repository
+dto
+mapper
+entity
+exception
 ```
 
-Enable JPA auditing with:
-
-```java
-@EnableJpaAuditing
-```
-
-Avoid exposing entity classes directly to the frontend.
+Avoid putting all files into only generic top-level packages such as `controller`, `service`, `repository`, and `entity`.
 
 ---
 
-## Role Design
+## API Direction
 
-Use enum for roles in Java.
+Suggested APIs:
 
-Example:
+```http
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
 
-```java
-public enum UserRole {
-    USER,
-    ADMIN
-}
+POST   /api/v1/links
+GET    /api/v1/links
+GET    /api/v1/links/{id}
+PATCH  /api/v1/links/{id}
+DELETE /api/v1/links/{id}
+PATCH  /api/v1/links/{id}/activate
+PATCH  /api/v1/links/{id}/deactivate
+
+GET    /{shortCode}
+
+GET    /api/v1/links/{id}/analytics
+GET    /api/v1/links/{id}/click-events
 ```
 
-Store role as string in the database.
-
-Example:
-
-```java
-@Enumerated(EnumType.STRING)
-private UserRole role;
-```
-
-Database column:
-
-```sql
-role VARCHAR(50) NOT NULL DEFAULT 'USER'
-```
-
-Do not use ordinal enum mapping.
+The redirect endpoint must be public. User management and analytics endpoints must be protected.
 
 ---
 
-## Current Technology Stack
+## Security Rules
 
-Use:
+Security is mandatory.
 
-* Java 21
-* Spring Boot 3.x
-* Spring Web
-* Spring Data JPA
-* Spring Security
-* PostgreSQL
-* Flyway
-* Lombok
-* MapStruct
-* Jakarta Bean Validation
-* Docker / Docker Compose
+Required rules:
 
-Future optional technologies:
-
-* Redis
-* Kafka or Redis Stream
-* Swagger/OpenAPI
-* GitHub Actions
-* Prometheus/Grafana
-* Testcontainers
+* Use JWT authentication.
+* Store user ID in the JWT subject.
+* Use BCrypt for password hashing.
+* Protect all authenticated user APIs.
+* Keep the redirect endpoint public.
+* Users can only access their own links.
+* Users must not view, update, delete, or analyze another user's links.
+* Use role enum values: `USER`, `ADMIN`.
+* Store enum values as strings, not ordinals.
 
 ---
 
-## Development Priorities
+## Clean Code Rules
 
-The correct implementation order is:
+The coding agent must follow these rules:
+
+* Keep controllers thin.
+* Put business logic in services.
+* Use DTOs for requests and responses.
+* Never expose JPA entities directly.
+* Use constructor injection.
+* Validate request DTOs.
+* Use `@Transactional` for write operations.
+* Use `@Transactional(readOnly = true)` for query operations.
+* Avoid duplicated logic.
+* Avoid magic strings and magic numbers.
+* Use global exception handling.
+* Return consistent response shapes.
+* Use pagination for list APIs.
+* Avoid N+1 queries.
+* Keep methods small and intention-revealing.
+
+---
+
+## Redirect Flow
+
+The redirect flow should work like this:
+
+```text
+Visitor opens short URL
+        ↓
+Backend receives shortCode
+        ↓
+Find link by shortCode
+        ↓
+Check link exists
+        ↓
+Check link is active
+        ↓
+Check link is not expired
+        ↓
+Increase click count
+        ↓
+Store click event
+        ↓
+Redirect to original URL
+```
+
+For the MVP, direct PostgreSQL access is acceptable.
+
+For future scaling, Redis can cache:
+
+```text
+shortCode -> originalUrl
+```
+
+---
+
+## Short Code Generation
+
+Short codes must be unique and URL-safe.
+
+Recommended MVP approach:
+
+1. Generate a random Base62 code.
+2. Check uniqueness through the database.
+3. Use a unique constraint on `links.short_code`.
+4. Retry if a collision happens.
+5. Stop after a maximum retry limit.
+
+Allowed characters:
+
+```text
+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+```
+
+---
+
+## Development Order
+
+Implement the project in this order:
 
 1. Project setup
-2. PostgreSQL and Docker Compose
-3. Flyway migration
-4. User entity and repository
+2. Docker PostgreSQL
+3. Flyway migrations
+4. User module
 5. Authentication and JWT
-6. Link entity and repository
-7. Create short link API
-8. Redirect API
+6. Link module
+7. Short code generator
+8. Redirect flow
 9. Link management APIs
-10. Click count tracking
-11. Click event tracking
-12. Basic analytics
-13. Pagination and filtering
-14. Global exception handling
-15. API response standardization
-16. Security hardening
-17. Testing
-18. Documentation
+10. Click tracking
+11. Basic analytics
+12. Pagination and filtering
+13. Global exception handling
+14. Tests
+15. README documentation
 
-Do not start with advanced Redis/Kafka architecture before the MVP works correctly.
+Do not add Redis, Kafka, or advanced analytics before the MVP works correctly.
 
 ---
 
-## Testing Requirements
+## Final Goal
 
-At minimum, write tests for:
+Build LinkFlow Platform as a strong Backend Java Spring Boot CV project.
 
-* Short code generation
-* User registration
-* Login flow
-* Create link
-* Redirect active link
-* Reject inactive link
-* Reject expired link
-* Prevent users from accessing other users' links
-* Link pagination
-* Basic analytics
+The project should prove knowledge of:
 
-Recommended test types:
-
-* Unit tests for pure business logic
-* Integration tests for repositories
-* Controller tests for API behavior
-* Security tests for protected endpoints
-
----
-
-## Documentation Requirements
-
-The project should include a clear `README.md`.
-
-The README should explain:
-
-* What the project does
-* Main features
-* Tech stack
-* How to run locally
-* Environment variables
+* REST API design
+* Authentication
+* Authorization
 * Database migration
-* API examples
-* Future improvements
-
-Optional:
-
-* Swagger/OpenAPI documentation
-* Architecture diagram
-* Database diagram
-* Sequence diagram for redirect flow
-
----
-
-## Important Design Principle
-
-This project must be built as a backend engineering portfolio project.
-
-Do not make it look like a simple tutorial URL shortener.
-
-The project should demonstrate:
-
+* Ownership-based security
+* Fast redirect logic
+* Analytics modeling
 * Clean architecture
-* Secure authentication
-* Ownership-based authorization
-* Database migration discipline
-* Scalable redirect design
-* Analytics event modeling
-* Production-ready API design
-* Maintainable package structure
-* Clear error handling
-* Strong validation
-
----
-
-## What the Agent Must Avoid
-
-Avoid:
-
-* Creating all code in one package
-* Returning JPA entities directly
-* Using Hibernate auto-DDL as the main schema tool
-* Ignoring ownership checks
-* Making redirect APIs require login
-* Writing business logic in controllers
-* Skipping validation
-* Skipping global exception handling
-* Creating inconsistent API responses
-* Adding Redis/Kafka too early
-* Over-engineering before MVP completion
-* Using ordinal enum mapping
-* Silently catching exceptions
-* Hardcoding user IDs
-* Allowing users to update other users' links
-
----
-
-## Final Direction
-
-Build LinkFlow Platform step by step.
-
-The MVP should be simple but clean.
-
-The final version should be strong enough to put on a Backend Java Spring Boot CV.
-
-The project should prove that the developer understands not only CRUD, but also authentication, authorization, database design, fast redirects, analytics, caching readiness, scalability, and production-level backend engineering.
+* Production-ready backend practices
