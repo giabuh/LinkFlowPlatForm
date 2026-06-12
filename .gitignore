@@ -6,3 +6,6 @@
 
 # OS
 .DS_Store
+
+# graphify knowledge-graph output
+graphify-out/
