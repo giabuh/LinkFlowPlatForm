@@ -1,7 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
 @import "tailwindcss";
+
+/* "Micro" design tokens (see DESIGN.md). haffer->Inter, perfectlyNineties->Playfair Display. */
+@theme {
+  --color-ink: #221f1c;
+  --color-paper: #f5f5f5;
+  --color-card: #ffffff;
+  --color-stone: #797267;
+  --color-pebble: #8c8a88;
+  --color-edge: #27272a;
+  --color-azure: #518bdb;
+  --color-teal: #36bab8;
+  --color-mint: #cbfbf1;
+  --color-peach: #f8ebd8;
+  --color-lavender: #ede9fe;
+  --color-tealmist: #cff2ef;
+  --color-coral: #ed6d68;
+  --color-amber: #e5a057;
+  --color-orchid: #bf89cd;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+}
 
 html,
 body,
 #root {
   min-height: 100vh;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Global UI scale: rem-based utilities scale with the root font size. */
+html {
+  font-size: 110%;
 }

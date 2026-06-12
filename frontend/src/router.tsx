@@ -1,23 +1,39 @@
-import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router'
-import RootLayout from './components/RootLayout'
-import HomePage from './pages/HomePage'
-import HealthPage from './pages/HealthPage'
+import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
+import AppShell from './components/AppShell'
+import LoginPage from './pages/LoginPage'
+import OverviewPage from './pages/OverviewPage'
+import LinksPage from './pages/LinksPage'
+import UsersPage from './pages/UsersPage'
+import { useAuthStore } from './stores/auth'
 
-const rootRoute = createRootRoute({ component: RootLayout })
+const rootRoute = createRootRoute({ component: () => <Outlet /> })
 
-const indexRoute = createRoute({
+const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
-  component: HomePage,
+  path: '/login',
+  component: LoginPage,
+  beforeLoad: () => {
+    if (useAuthStore.getState().token) throw redirect({ to: '/' })
+  },
 })
 
-const healthRoute = createRoute({
+const appRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/health',
-  component: HealthPage,
+  id: 'app',
+  component: AppShell,
+  beforeLoad: () => {
+    if (!useAuthStore.getState().token) throw redirect({ to: '/login' })
+  },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, healthRoute])
+const indexRoute = createRoute({ getParentRoute: () => appRoute, path: '/', component: OverviewPage })
+const linksRoute = createRoute({ getParentRoute: () => appRoute, path: '/links', component: LinksPage })
+const usersRoute = createRoute({ getParentRoute: () => appRoute, path: '/users', component: UsersPage })
+
+const routeTree = rootRoute.addChildren([
+  loginRoute,
+  appRoute.addChildren([indexRoute, linksRoute, usersRoute]),
+])
 
 export const router = createRouter({ routeTree })
 

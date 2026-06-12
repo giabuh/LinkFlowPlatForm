@@ -1,21 +1,5 @@
 import { useAuthStore } from '../stores/auth'
-
-/** Standard success envelope produced by the backend ApiResponseBodyAdvice. */
-export interface ApiResponse<T> {
-  code: number
-  message: string
-  data: T
-}
-
-/** Shape of PageResponse.from(page), used by paginated list endpoints. */
-export interface PageResponse<T> {
-  items: T[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-  last: boolean
-}
+import type { ApiEnvelope, LinkItem, LinkPayload, LoginResult, Page, User, UserPayload } from './types'
 
 export class ApiError extends Error {
   readonly code: number
@@ -27,16 +11,11 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = '/api/v1'
+const BASE = '/api/v1'
 
-/**
- * Thin fetch wrapper that unwraps the backend envelope and throws ApiError on
- * failure. Sends credentials so the HttpOnly refresh cookie flows on
- * /auth/refresh, and attaches the access token from the auth store when present.
- */
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = useAuthStore.getState().accessToken
-  const res = await fetch(`${BASE_URL}${path}`, {
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = useAuthStore.getState().token
+  const res = await fetch(`${BASE}${path}`, {
     ...init,
     credentials: 'include',
     headers: {
@@ -46,10 +25,13 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     },
   })
 
-  let body: ApiResponse<T> | undefined
+  if (res.status === 204) return undefined as T
+
+  let body: ApiEnvelope<T> | undefined
   try {
-    body = (await res.json()) as ApiResponse<T>
+    body = (await res.json()) as ApiEnvelope<T>
   } catch {
+    if (res.ok) return undefined as T
     throw new ApiError(res.status, res.statusText || 'Network error')
   }
 
@@ -57,4 +39,73 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     throw new ApiError(body?.code ?? res.status, body?.message ?? 'Request failed')
   }
   return body.data
+}
+
+export function login(email: string, password: string): Promise<LoginResult> {
+  return request<LoginResult>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+}
+
+export function getMe(): Promise<User> {
+  return request<User>('/auth/me')
+}
+
+export function logout(): Promise<void> {
+  return request<void>('/auth/logout', { method: 'POST' })
+}
+
+export interface LinkQuery {
+  page?: number
+  size?: number
+  sortBy?: string
+  sortDirection?: 'asc' | 'desc'
+  title?: string
+  active?: boolean
+}
+
+export function listLinks(query: LinkQuery = {}): Promise<Page<LinkItem>> {
+  const params = new URLSearchParams()
+  if (query.page) params.set('page', String(query.page))
+  if (query.size) params.set('size', String(query.size))
+  if (query.sortBy) params.set('sortBy', query.sortBy)
+  if (query.sortDirection) params.set('sortDirection', query.sortDirection)
+  if (query.title) params.set('title', query.title)
+  if (query.active != null) params.set('active', String(query.active))
+  const qs = params.toString()
+  return request<Page<LinkItem>>(`/links${qs ? `?${qs}` : ''}`)
+}
+
+export function createLink(body: LinkPayload): Promise<LinkItem> {
+  return request<LinkItem>('/links', { method: 'POST', body: JSON.stringify(body) })
+}
+
+export function updateLink(id: string, body: LinkPayload): Promise<LinkItem> {
+  return request<LinkItem>(`/links/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+}
+
+export function setLinkActive(id: string, active: boolean): Promise<LinkItem> {
+  return request<LinkItem>(`/links/${id}/${active ? 'activate' : 'deactivate'}`, { method: 'PATCH' })
+}
+
+export function deleteLink(id: string): Promise<void> {
+  return request<void>(`/links/${id}`, { method: 'DELETE' })
+}
+
+export function listUsers(query: { page?: number; size?: number } = {}): Promise<Page<User>> {
+  const params = new URLSearchParams()
+  if (query.page) params.set('page', String(query.page))
+  if (query.size) params.set('size', String(query.size))
+  const qs = params.toString()
+  return request<Page<User>>(`/users${qs ? `?${qs}` : ''}`)
+}
+
+export function createUser(body: UserPayload): Promise<User> {
+  return request<User>('/users', { method: 'POST', body: JSON.stringify(body) })
+}
+
+export function updateUser(id: string, body: UserPayload): Promise<User> {
+  return request<User>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+}
+
+export function deleteUser(id: string): Promise<void> {
+  return request<void>(`/users/${id}`, { method: 'DELETE' })
 }

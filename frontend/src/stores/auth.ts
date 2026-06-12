@@ -1,17 +1,28 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import type { User } from '../lib/types'
 
 interface AuthState {
-  accessToken: string | null
-  setAccessToken: (token: string | null) => void
+  token: string | null
+  user: User | null
+  setAuth: (token: string, user: User) => void
+  setUser: (user: User) => void
   clear: () => void
 }
 
 /**
- * Holds the short-lived JWT access token in memory. The refresh token lives in
- * an HttpOnly cookie managed by the backend, so it is intentionally not kept here.
+ * Persists the access token + user so a page refresh stays logged in. The
+ * long-lived refresh token stays in an HttpOnly cookie owned by the backend.
  */
-export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: null,
-  setAccessToken: (accessToken) => set({ accessToken }),
-  clear: () => set({ accessToken: null }),
-}))
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+      setAuth: (token, user) => set({ token, user }),
+      setUser: (user) => set({ user }),
+      clear: () => set({ token: null, user: null }),
+    }),
+    { name: 'linkflow-auth' },
+  ),
+)
