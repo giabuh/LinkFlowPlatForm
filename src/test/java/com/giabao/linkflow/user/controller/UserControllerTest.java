@@ -72,7 +72,7 @@ class UserControllerTest {
                 List.of(new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.ADMIN))
         ));
 
-        mockMvc.perform(get("/users")
+        mockMvc.perform(get("/api/v1/users")
                         .param("page", "1")
                         .param("size", "5")
                         .param("email", "ada")
@@ -105,7 +105,7 @@ class UserControllerTest {
         when(userService.getUserById(userId))
                 .thenReturn(new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.USER));
 
-        mockMvc.perform(get("/users/{id}", userId))
+        mockMvc.perform(get("/api/v1/users/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("User retrieved successfully"))
@@ -125,7 +125,7 @@ class UserControllerTest {
         when(userService.createUser(any(CreateUserRequest.class)))
                 .thenReturn(new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.ADMIN));
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -143,7 +143,7 @@ class UserControllerTest {
     void createUserRejectsInvalidRequest() throws Exception {
         CreateUserRequest request = new CreateUserRequest("not-an-email", "", "", UserRole.USER);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -165,7 +165,7 @@ class UserControllerTest {
                 null
         );
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -187,7 +187,7 @@ class UserControllerTest {
         when(userService.createUser(any(CreateUserRequest.class)))
                 .thenThrow(new AppException(ErrorCode.CONFLICT, "Email already exists"));
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -198,7 +198,7 @@ class UserControllerTest {
 
     @Test
     void invalidUserIdReturnsInvalidArgumentEnvelope() throws Exception {
-        mockMvc.perform(get("/users/not-a-uuid"))
+        mockMvc.perform(get("/api/v1/users/not-a-uuid"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
                 .andExpect(jsonPath("$.message").value("Validation failed for specified fields"))
@@ -209,7 +209,7 @@ class UserControllerTest {
 
     @Test
     void invalidUserFilterReturnsInvalidArgumentEnvelope() throws Exception {
-        mockMvc.perform(get("/users")
+        mockMvc.perform(get("/api/v1/users")
                         .param("role", "INVALID"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400))
@@ -231,7 +231,7 @@ class UserControllerTest {
         when(userService.updateUser(userId, request))
                 .thenReturn(new UserResponse(userId, "grace@example.com", "Grace Hopper", UserRole.ADMIN));
 
-        mockMvc.perform(put("/users/{id}", userId)
+        mockMvc.perform(put("/api/v1/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -247,7 +247,7 @@ class UserControllerTest {
         UUID userId = UUID.randomUUID();
         UpdateUserRequest request = new UpdateUserRequest("", "", "", null);
 
-        mockMvc.perform(put("/users/{id}", userId)
+        mockMvc.perform(put("/api/v1/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -265,7 +265,7 @@ class UserControllerTest {
     void deleteUserReturnsSuccessEnvelope() throws Exception {
         UUID userId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/users/{id}", userId))
+        mockMvc.perform(delete("/api/v1/users/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("User deleted successfully"))
@@ -279,7 +279,7 @@ class UserControllerTest {
         UUID userId = UUID.randomUUID();
         doThrow(new AppException(ErrorCode.NOT_FOUND, "User profile not found")).when(userService).deleteUser(userId);
 
-        mockMvc.perform(delete("/users/{id}", userId))
+        mockMvc.perform(delete("/api/v1/users/{id}", userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(404))
                 .andExpect(jsonPath("$.message").value("User profile not found"))

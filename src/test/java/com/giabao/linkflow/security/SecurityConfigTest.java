@@ -47,7 +47,7 @@ class SecurityConfigTest {
 
     @Test
     void usersEndpointRequiresAuthentication() throws Exception {
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401));
     }
@@ -57,7 +57,7 @@ class SecurityConfigTest {
         when(tokenService.parseAccessToken("invalid-token"))
                 .thenThrow(new AppException(ErrorCode.UNAUTHORIZED, "Invalid or expired token"));
 
-        mockMvc.perform(get("/users").header("Authorization", "Bearer invalid-token"))
+        mockMvc.perform(get("/api/v1/users").header("Authorization", "Bearer invalid-token"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401));
     }
@@ -69,7 +69,7 @@ class SecurityConfigTest {
         when(tokenService.parseAccessToken("valid-token")).thenReturn(new ParsedAccessToken(userId, "ADMIN", sessionId));
         when(refreshSessionService.exists(sessionId)).thenReturn(false);
 
-        mockMvc.perform(get("/users").header("Authorization", "Bearer valid-token"))
+        mockMvc.perform(get("/api/v1/users").header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401));
     }

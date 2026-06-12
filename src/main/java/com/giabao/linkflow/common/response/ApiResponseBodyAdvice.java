@@ -37,6 +37,10 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             ServerHttpRequest request,
             ServerHttpResponse response
     ) {
+        if (body == null && getStatusCode(response) >= 300) {
+            return null;
+        }
+
         if (body instanceof ApiResponse<?>) {
             return body;
         }
