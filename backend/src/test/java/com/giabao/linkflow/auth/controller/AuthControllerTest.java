@@ -3,6 +3,7 @@ package com.giabao.linkflow.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giabao.linkflow.auth.dto.request.LoginRequest;
 import com.giabao.linkflow.auth.dto.request.RegisterRequest;
+import com.giabao.linkflow.auth.dto.response.LoginResponse;
 import com.giabao.linkflow.auth.dto.response.TokenResponse;
 import com.giabao.linkflow.auth.service.AuthService;
 import com.giabao.linkflow.auth.service.RefreshSessionService;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -88,9 +90,11 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginReturnsAccessToken() throws Exception {
+    void loginReturnsAccessTokenAndUser() throws Exception {
+        UUID userId = UUID.randomUUID();
         LoginRequest request = new LoginRequest("ada@example.com", "secret-password");
-        when(authService.login(any(LoginRequest.class), any())).thenReturn(new TokenResponse("access-token"));
+        UserResponse user = new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.USER);
+        when(authService.login(any(LoginRequest.class), any())).thenReturn(new LoginResponse("access-token", user));
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +102,23 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("User logged in successfully"))
-                .andExpect(jsonPath("$.data.accessToken").value("access-token"));
+                .andExpect(jsonPath("$.data.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.data.user.email").value("ada@example.com"))
+                .andExpect(jsonPath("$.data.user.role").value("USER"));
+    }
+
+    @Test
+    void meReturnsCurrentUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(authService.getCurrentUser())
+                .thenReturn(new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.USER));
+
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("Current user retrieved successfully"))
+                .andExpect(jsonPath("$.data.id").value(userId.toString()))
+                .andExpect(jsonPath("$.data.email").value("ada@example.com"));
     }
 
     @Test

@@ -3,9 +3,11 @@ package com.giabao.linkflow.auth.service;
 import com.giabao.linkflow.auth.token.ParsedRefreshToken;
 import com.giabao.linkflow.auth.dto.request.LoginRequest;
 import com.giabao.linkflow.auth.dto.request.RegisterRequest;
+import com.giabao.linkflow.auth.dto.response.LoginResponse;
 import com.giabao.linkflow.auth.dto.response.TokenResponse;
 import com.giabao.linkflow.common.exception.AppException;
 import com.giabao.linkflow.common.response.ErrorCode;
+import com.giabao.linkflow.security.CurrentUserService;
 import com.giabao.linkflow.security.CustomUserDetails;
 import com.giabao.linkflow.security.CustomUserDetailsService;
 import com.giabao.linkflow.user.dto.request.CreateUserRequest;
@@ -30,6 +32,7 @@ public class AuthService {
     private final RefreshSessionService refreshSessionService;
     private final RefreshCookieService refreshCookieService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CurrentUserService currentUserService;
 
     public UserResponse register(RegisterRequest request) {
         return userService.createUser(new CreateUserRequest(
@@ -40,7 +43,7 @@ public class AuthService {
         ));
     }
 
-    public TokenResponse login(LoginRequest request, HttpServletResponse response) {
+    public LoginResponse login(LoginRequest request, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -52,7 +55,11 @@ public class AuthService {
         refreshSessionService.save(sessionId, user.getId(), refreshToken);
         refreshCookieService.addRefreshCookie(response, refreshToken);
 
-        return new TokenResponse(accessToken);
+        return new LoginResponse(accessToken, userService.getUserById(user.getId()));
+    }
+
+    public UserResponse getCurrentUser() {
+        return userService.getUserById(currentUserService.getCurrentUser().getId());
     }
 
     public TokenResponse refresh(Cookie[] cookies, HttpServletResponse response) {

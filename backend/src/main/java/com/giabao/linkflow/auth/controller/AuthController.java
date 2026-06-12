@@ -2,6 +2,7 @@ package com.giabao.linkflow.auth.controller;
 
 import com.giabao.linkflow.auth.dto.request.LoginRequest;
 import com.giabao.linkflow.auth.dto.request.RegisterRequest;
+import com.giabao.linkflow.auth.dto.response.LoginResponse;
 import com.giabao.linkflow.auth.dto.response.TokenResponse;
 import com.giabao.linkflow.auth.service.AuthService;
 import com.giabao.linkflow.common.annotation.ApiMessage;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,11 +33,17 @@ public class AuthController {
 
     @PostMapping("/login")
     @ApiMessage("User logged in successfully")
-    public ResponseEntity<TokenResponse> login(
+    public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
         return ResponseEntity.ok(authService.login(request, response));
+    }
+
+    @GetMapping("/me")
+    @ApiMessage("Current user retrieved successfully")
+    public ResponseEntity<UserResponse> me() {
+        return ResponseEntity.ok(authService.getCurrentUser());
     }
 
     @PostMapping("/refresh")

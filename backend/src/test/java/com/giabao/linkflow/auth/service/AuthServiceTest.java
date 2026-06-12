@@ -4,8 +4,10 @@ import com.giabao.linkflow.auth.token.ParsedRefreshToken;
 import com.giabao.linkflow.auth.session.RefreshSession;
 import com.giabao.linkflow.auth.dto.request.LoginRequest;
 import com.giabao.linkflow.auth.dto.request.RegisterRequest;
+import com.giabao.linkflow.auth.dto.response.LoginResponse;
 import com.giabao.linkflow.auth.dto.response.TokenResponse;
 import com.giabao.linkflow.common.exception.AppException;
+import com.giabao.linkflow.security.CurrentUserService;
 import com.giabao.linkflow.security.CustomUserDetails;
 import com.giabao.linkflow.security.CustomUserDetailsService;
 import com.giabao.linkflow.user.dto.request.CreateUserRequest;
@@ -57,6 +59,9 @@ class AuthServiceTest {
     @Mock
     private CustomUserDetailsService customUserDetailsService;
 
+    @Mock
+    private CurrentUserService currentUserService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -80,20 +85,37 @@ class AuthServiceTest {
     }
 
     @Test
-    void loginAuthenticatesWithAuthenticationManagerAndCreatesRefreshSession() throws Exception {
-        CustomUserDetails userDetails = userDetails(UUID.randomUUID(), UserRole.USER);
+    void loginAuthenticatesWithAuthenticationManagerAndReturnsTokenWithUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        CustomUserDetails userDetails = userDetails(userId, UserRole.USER);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         LoginRequest request = new LoginRequest("ada@example.com", "secret-password");
+        UserResponse userResponse = new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.USER);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(tokenService.createAccessToken(eq(userDetails), any(UUID.class))).thenReturn("access-token");
         when(tokenService.createRefreshToken(eq(userDetails), any(UUID.class))).thenReturn("refresh-token");
+        when(userService.getUserById(userId)).thenReturn(userResponse);
 
-        TokenResponse response = authService.login(request, httpServletResponse);
+        LoginResponse response = authService.login(request, httpServletResponse);
 
         assertThat(response.accessToken()).isEqualTo("access-token");
+        assertThat(response.user()).isSameAs(userResponse);
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(refreshSessionService).save(any(UUID.class), eq(userDetails.getId()), eq("refresh-token"));
+        verify(refreshSessionService).save(any(UUID.class), eq(userId), eq("refresh-token"));
         verify(refreshCookieService).addRefreshCookie(httpServletResponse, "refresh-token");
+    }
+
+    @Test
+    void getCurrentUserReturnsAuthenticatedUserProfile() throws Exception {
+        UUID userId = UUID.randomUUID();
+        CustomUserDetails userDetails = userDetails(userId, UserRole.USER);
+        UserResponse userResponse = new UserResponse(userId, "ada@example.com", "Ada Lovelace", UserRole.USER);
+        when(currentUserService.getCurrentUser()).thenReturn(userDetails);
+        when(userService.getUserById(userId)).thenReturn(userResponse);
+
+        UserResponse actual = authService.getCurrentUser();
+
+        assertThat(actual).isSameAs(userResponse);
     }
 
     @Test
