@@ -452,6 +452,8 @@ Important test cases:
 
 ## 13. Local Development
 
+> The backend lives in `backend/`. Run all commands below from that directory (`cd backend`).
+
 ### Prerequisites
 
 - Java 21
