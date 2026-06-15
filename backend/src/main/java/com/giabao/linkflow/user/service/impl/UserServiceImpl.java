@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<UserResponse> getAllUser(UserFilterRequest request) {
         Page<UserResponse> users = userRepository
                 .findAll(
@@ -43,11 +45,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserById(UUID id) {
         return userMapper.toResponse(findUserById(id));
     }
 
     @Override
+    @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         String email = normalizeEmail(request.email());
         if (userRepository.existsByEmail(email)) {
@@ -62,6 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponse updateUser(UUID id, UpdateUserRequest request) {
         User user = findUserById(id);
 
@@ -74,10 +79,11 @@ public class UserServiceImpl implements UserService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        return userMapper.toResponse(userRepository.save(user));
+        return userMapper.toResponse(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new AppException(ErrorCode.NOT_FOUND, USER_PROFILE_NOT_FOUND_MESSAGE);

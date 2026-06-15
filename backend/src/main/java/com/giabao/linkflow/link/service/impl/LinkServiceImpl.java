@@ -68,7 +68,7 @@ public class LinkServiceImpl implements LinkService {
         Link link = findOwnedLink(id);
         linkMapper.updateEntity(request, link);
 
-        return linkMapper.toResponse(linkRepository.save(link));
+        return linkMapper.toResponse(link);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class LinkServiceImpl implements LinkService {
         Link link = findOwnedLink(id);
         link.setActive(active);
 
-        return linkMapper.toResponse(linkRepository.save(link));
+        return linkMapper.toResponse(link);
     }
 
     private Link findOwnedLink(UUID id) {

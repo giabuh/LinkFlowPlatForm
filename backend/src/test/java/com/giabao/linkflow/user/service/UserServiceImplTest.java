@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -175,7 +176,6 @@ class UserServiceImplTest {
             return null;
         }).when(userMapper).updateEntity(request, existingUser);
         when(passwordEncoder.encode("new-secret-password")).thenReturn("new-hash");
-        when(userRepository.save(existingUser)).thenReturn(existingUser);
         when(userMapper.toResponse(existingUser)).thenReturn(response);
 
         UserResponse actual = userService.updateUser(userId, request);
@@ -186,6 +186,7 @@ class UserServiceImplTest {
         assertThat(existingUser.getFullName()).isEqualTo("New Name");
         assertThat(existingUser.getRole()).isEqualTo(UserRole.ADMIN);
         verify(userMapper).updateEntity(request, existingUser);
+        verify(userRepository, never()).save(any());
     }
 
     @Test

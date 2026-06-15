@@ -135,11 +135,11 @@ class LinkServiceImplTest {
                 0L, true, null, Instant.now(), Instant.now());
 
         when(linkRepository.findByIdAndUserId(linkId, currentUserId)).thenReturn(Optional.of(link));
-        when(linkRepository.save(link)).thenReturn(link);
         when(linkMapper.toResponse(link)).thenReturn(response);
 
         assertThat(linkService.updateLink(linkId, request)).isSameAs(response);
         verify(linkMapper).updateEntity(request, link);
+        verify(linkRepository, never()).save(any());
     }
 
     @Test
@@ -149,7 +149,6 @@ class LinkServiceImplTest {
         link.setActive(false);
 
         when(linkRepository.findByIdAndUserId(linkId, currentUserId)).thenReturn(Optional.of(link));
-        when(linkRepository.save(link)).thenReturn(link);
         when(linkMapper.toResponse(link)).thenReturn(
                 new LinkResponse(linkId, "https://example.com", "aB92xK7", null,
                         0L, true, null, Instant.now(), Instant.now()));
@@ -157,7 +156,7 @@ class LinkServiceImplTest {
         linkService.activateLink(linkId);
 
         assertThat(link.getActive()).isTrue();
-        verify(linkRepository).save(link);
+        verify(linkRepository, never()).save(any());
     }
 
     @Test
@@ -167,7 +166,6 @@ class LinkServiceImplTest {
         link.setActive(true);
 
         when(linkRepository.findByIdAndUserId(linkId, currentUserId)).thenReturn(Optional.of(link));
-        when(linkRepository.save(link)).thenReturn(link);
         when(linkMapper.toResponse(link)).thenReturn(
                 new LinkResponse(linkId, "https://example.com", "aB92xK7", null,
                         0L, false, null, Instant.now(), Instant.now()));
@@ -175,7 +173,7 @@ class LinkServiceImplTest {
         linkService.deactivateLink(linkId);
 
         assertThat(link.getActive()).isFalse();
-        verify(linkRepository).save(link);
+        verify(linkRepository, never()).save(any());
     }
 
     @Test
