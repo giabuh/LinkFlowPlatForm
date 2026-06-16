@@ -1,5 +1,6 @@
 package com.giabao.linkflow.redirect.controller;
 
+import com.giabao.linkflow.analytics.service.ClickContext;
 import com.giabao.linkflow.auth.service.RefreshSessionService;
 import com.giabao.linkflow.auth.service.TokenService;
 import com.giabao.linkflow.redirect.service.RedirectService;
@@ -13,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -40,7 +43,8 @@ class RedirectControllerTest {
 
     @Test
     void redirectsWithFoundAndLocationHeaderAndNoEnvelope() throws Exception {
-        when(redirectService.resolveActiveUrl("aB92xK7")).thenReturn(Optional.of("https://example.com"));
+        when(redirectService.resolveActiveUrl(eq("aB92xK7"), any(ClickContext.class)))
+                .thenReturn(Optional.of("https://example.com"));
 
         mockMvc.perform(get("/aB92xK7"))
                 .andExpect(status().isFound())
@@ -50,7 +54,8 @@ class RedirectControllerTest {
 
     @Test
     void returnsPlainNotFoundWhenUnresolved() throws Exception {
-        when(redirectService.resolveActiveUrl("aB92xK7")).thenReturn(Optional.empty());
+        when(redirectService.resolveActiveUrl(eq("aB92xK7"), any(ClickContext.class)))
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/aB92xK7"))
                 .andExpect(status().isNotFound())

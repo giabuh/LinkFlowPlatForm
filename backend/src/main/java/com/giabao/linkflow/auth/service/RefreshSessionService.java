@@ -2,15 +2,14 @@ package com.giabao.linkflow.auth.service;
 
 import com.giabao.linkflow.auth.config.JwtProperties;
 import com.giabao.linkflow.auth.session.RefreshSession;
+import com.giabao.linkflow.common.util.HashingUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,8 +17,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshSessionService {
     private static final String KEY_PREFIX = "auth:refresh-session:";
-    private static final String HASH_ALGORITHM = "SHA-256";
-    private static final HexFormat HEX = HexFormat.of();
 
     private final RedisTemplate<String, RefreshSession> redisTemplate;
     private final JwtProperties jwtProperties;
@@ -55,12 +52,7 @@ public class RefreshSessionService {
     }
 
     String hash(String refreshToken) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
-            return HEX.formatHex(digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("Refresh token hash algorithm is unavailable", exception);
-        }
+        return HashingUtil.sha256Hex(refreshToken);
     }
 
     private String key(UUID sessionId) {

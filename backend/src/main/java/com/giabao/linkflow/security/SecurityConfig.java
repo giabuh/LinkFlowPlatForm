@@ -1,5 +1,6 @@
 package com.giabao.linkflow.security;
 
+import com.giabao.linkflow.common.constant.ShortCodePattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers(new RegexRequestMatcher("^/[A-Za-z0-9]{6,32}$", HttpMethod.GET.name()))
+                        .requestMatchers(new RegexRequestMatcher("^/" + ShortCodePattern.REGEX + "$", HttpMethod.GET.name()))
                         .permitAll()
                         .anyRequest().authenticated()
                 )
